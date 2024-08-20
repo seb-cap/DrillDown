@@ -111,6 +111,7 @@ import de.dakror.quarry.game.Layer;
 import de.dakror.quarry.game.LoadingCompat;
 import de.dakror.quarry.game.Science;
 import de.dakror.quarry.game.Science.ScienceType;
+import de.dakror.quarry.game.Tile;
 import de.dakror.quarry.game.Tile.TileMeta;
 import de.dakror.quarry.game.Tile.TileType;
 import de.dakror.quarry.game.power.Edge;
@@ -4174,6 +4175,17 @@ public class Game extends GameScene {
             Layer l = new Layer(layers.size, Const.DEFAULT_LAYER_SIZE, Const.DEFAULT_LAYER_SIZE, TileType.Stone, true,
                     false);
             Generator.G.generate(l);
+            layers.add(l);
+            layerChangeNotifier.notify(Type.ADD, l);
+            return l;
+        }
+    }
+
+    public Layer addSpecializedLayer(Tile.OreType specialization) {
+        synchronized (layerLock) {
+            Layer l = new Layer(layers.size, Const.DEFAULT_LAYER_SIZE, Const.DEFAULT_LAYER_SIZE, TileType.Stone, true,
+                    false);
+            Generator.G.generateOfType(l, specialization);
             layers.add(l);
             layerChangeNotifier.notify(Type.ADD, l);
             return l;

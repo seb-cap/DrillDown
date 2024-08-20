@@ -55,12 +55,19 @@ public class ShaftDrill extends ProducerStructure {
             new RecipeList() {
                 @Override
                 protected void init() {
+                    add(new Recipe(300f, "iron").input(new Amount(ItemType.Water, 75000), new Amount(ItemType.SteelIngot, 180), new Amount(ItemType.ConcretePowder, 120), new Amount(ItemType.IronOre, 500)));
+                    add(new Recipe(300f, "copper").input(new Amount(ItemType.Water, 75000), new Amount(ItemType.SteelIngot, 180), new Amount(ItemType.ConcretePowder, 120), new Amount(ItemType.CopperOre, 500)));
+                    add(new Recipe(300f, "tin").input(new Amount(ItemType.Water, 75000), new Amount(ItemType.SteelIngot, 180), new Amount(ItemType.ConcretePowder, 120), new Amount(ItemType.TinOre, 500)));
+                    add(new Recipe(300f, "dirt").input(new Amount(ItemType.Water, 75000), new Amount(ItemType.SteelIngot, 180), new Amount(ItemType.ConcretePowder, 120), new Amount(ItemType.Dirt, 500)));
+                    add(new Recipe(300f, "clay").input(new Amount(ItemType.Water, 75000), new Amount(ItemType.SteelIngot, 180), new Amount(ItemType.ConcretePowder, 120), new Amount(ItemType.Clay, 500)));
+                    add(new Recipe(300f, "oil").input(new Amount(ItemType.Water, 75000), new Amount(ItemType.SteelIngot, 180), new Amount(ItemType.ConcretePowder, 120), new Amount(ItemType.CrudeOil, 500)));
                     add(new Recipe(300f, "drill").input(new Amount(ItemType.Water, 75000), new Amount(ItemType.SteelIngot, 180), new Amount(ItemType.ConcretePowder, 120)));
                 }
             }, new Sfx("shaftdrill" + Const.SFX_FORMAT),
             false,
-            new Dock(3, 0, Direction.East, DockType.FluidIn, new DockFilter(ItemType.Water)),
-            new Dock(2, 0, Direction.South, DockType.ItemIn, new DockFilter(ItemType.SteelIngot)), new Dock(3, 0, Direction.South, DockType.ItemIn, new DockFilter(ItemType.ConcretePowder)))
+            new Dock(3, 0, Direction.East, DockType.FluidIn, new DockFilter(ItemType.Water, ItemType.CrudeOil)),
+            new Dock(2, 0, Direction.South, DockType.ItemIn, new DockFilter(ItemType.SteelIngot)), new Dock(3, 0, Direction.South, DockType.ItemIn, new DockFilter(ItemType.ConcretePowder)),
+            new Dock(1, 0, Direction.South, DockType.ItemIn, new DockFilter(ItemType.IronOre, ItemType.CopperOre, ItemType.TinOre, ItemType.Dirt, ItemType.Clay)))
                     .flags(Flags.ConfirmDestruction)
                     .sciences(ScienceType.MineExpansion);
 
@@ -127,8 +134,13 @@ public class ShaftDrill extends ProducerStructure {
     @Override
     protected void doProductionStep() {
         Layer l = null;
+        Tile.OreType specialization = this.drillSpecialization();
         if (layer.getIndex() + depth == Game.G.getLayerCount() - 1) {
-            l = Game.G.addLayer();
+            if (specialization == null) {
+                l = Game.G.addLayer();
+            } else {
+                l = Game.G.addSpecializedLayer(specialization);
+            }
         } else {
             l = Game.G.getLayer(layer.getIndex() + depth + 1);
         }
@@ -169,5 +181,28 @@ public class ShaftDrill extends ProducerStructure {
     protected void loadData(CompoundTag tag) throws NBTException {
         super.loadData(tag);
         depth = tag.Int("depth", 0);
+    }
+
+    private Tile.OreType drillSpecialization() {
+        try {
+            switch (this.activeRecipe.getInput().entries[3].getItem()) {
+                case IronOre:
+                    return Tile.OreType.IronOre;
+                case CopperOre:
+                    return Tile.OreType.CopperOre;
+                case TinOre:
+                    return Tile.OreType.TinOre;
+                case Dirt:
+                    return Tile.OreType.Dirt;
+                case Clay:
+                    return Tile.OreType.Clay;
+                case CrudeOil:
+                    return Tile.OreType.CrudeOil;
+                default:
+                    return null;
+            }
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

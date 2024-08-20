@@ -70,6 +70,14 @@ public class Generator {
         }
     }
 
+    public void generateOfType(Layer layer, OreType type) {
+        for (int x = 0; x < layer.width; x++) {
+            for (int y = 0; y < layer.height; y++) {
+                layer.set(x, y, type.tile);
+            }
+        }
+    }
+
     private void generateVeins(Layer layer, OreType type) {
         float probability = layer.getIndex() < 40 ? type.getPropability(layer.getIndex()) : rng.nextFloat() * (1 + rng.nextFloat());
         float radius = type.minVeinRadius + (type.maxVeinRadius - type.minVeinRadius) * probability;
